@@ -1,0 +1,53 @@
+---
+title       : Course Enrollment History
+subtitle    : Interactive Chart and Data Table in a Web Application
+author      : Edgar
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Why?
+
+- Problem: Subject Coordinator requested historical course enrollment data to facilitate planning. It took weeks to deliver the report.
+- Goal: Provide subject coordinators and faculty administrators with timely access to the same data, and other tools for Enrollment Management.
+- Technology: What is most cost effective way of providing data access to many people?
+
+--- .class #id 
+
+## How?
+
+1. Enrollment data extracted from school ERP system to a text file
+2. Used R to automate processing of the data
+3. Used R's Shiny package to create interactive web app
+4. Published prototype web app on Github. 
+5. Ideal is a secure intranet server within the school network.
+
+--- .class #id
+
+## Chart Sample
+How effective is the planning and utilization of capacity?
+```{r echo=FALSE}
+library(ggplot2)
+library(reshape2)
+d <- read.csv("enrolldata.csv")
+select <- d[d$Subject=="ABCD"&d$AcyrCode>=1995&d$AcyrCode<2015,]
+pdata <- aggregate(select[,c(6,7)], list(select$Term), sum)
+pdata <- melt(pdata, id="Group.1")
+p <- ggplot(pdata, aes(Group.1, value, color=variable))+geom_line()
+p <- p + labs(x="Term", y="Enrollment", title="ABCD Enrollment per Term, Academic Years 1995-2015")
+p
+```
+
+--- .class #id
+
+## Detailed Data Table
+Investigate trends in the data, or find "dirty data"
+```{r, echo=FALSE, results="asis"}
+library(xtable)
+print(xtable(select[1:10,1:7]), type="html")
+```
